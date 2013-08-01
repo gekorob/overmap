@@ -1,0 +1,27 @@
+{
+  "name": "overmap",
+  "description": "An attempt to give you a small drawing layer over map...google map",
+  "version": "0.0.1",
+  "homepage": "",
+  "author": {
+    "name": "Roberto Ciatti",
+    "email": "roberto.ciatti@overhilllab.com",
+    "url": ""
+  },
+  "repository": {
+    "type": "git",
+    "url": ""
+  },
+  "scripts": {
+    "test": "grunt test"
+  },
+  "bugs": {
+    "url": ""
+  },
+  "devDependencies": {
+    "grunt-contrib-jasmine": "~0.4.0",
+    "grunt": "~0.4.0",
+    "grunt-contrib-jshint": "~0.2.0"
+  },
+  "dependencies": {}
+}

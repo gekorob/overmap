@@ -1,0 +1,9 @@
+# Ignore all logfiles and tempfiles.
+/log/*.log
+build
+
+.DS_Store
+.idea
+.grunt
+node_modules
+docs/.~*

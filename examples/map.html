@@ -1,0 +1,89 @@
+<html>
+<head>
+  <title>Map drawing manager trial</title>
+
+  <meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
+
+  <script src="http://maps.google.com/maps/api/js?libraries=drawing&amp;sensor=false"></script>
+  <script type="text/javascript" src="../lib/jquery-1.10.2.js"></script>
+  <script type="text/javascript" src="../src/overmap.js"></script>
+
+  <script type="text/javascript">
+    var dm, map, layer1;
+
+    $(document).ready(function(){
+      var mapCenter = new google.maps.LatLng(42.00, 12.00);
+      var mapOptions = {
+        zoom:6,
+        center:mapCenter,
+        mapTypeId:google.maps.MapTypeId.HYBRID,
+        panControl:true,
+        streetViewControl:false,
+        mapTypeControl:true,
+        disableDoubleClickZoom:true,
+        mapTypeControlOptions:{
+          style:google.maps.MapTypeControlStyle.DEFAULT,
+          position:google.maps.ControlPosition.TOP_RIGHT
+        }
+      };
+
+      map = new google.maps.Map($("#map")[0], mapOptions);
+      dm = new Overmap.DrawingManager(map);
+      layer1 = new Overmap.Layer('first', map);
+      layer2 = new Overmap.Layer('second', map);
+      layer2.layerOptions.strokeColor = '#00ffff';
+      layer2.layerOptions.fillColor = '#00ffff';
+
+
+      $('#layer1').click(function(){
+        dm.startDrawOnLayer(layer1);
+      });
+
+      $('#layer2').click(function(){
+        dm.startDrawOnLayer(layer2);
+      });
+    });
+  </script>
+
+
+  <style type="text/css">
+    #map {
+      height: 100%;
+      width: 100%;
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      z-index: 0;
+    }
+    html {
+      height: 100%
+    }
+
+    body {
+      height: 100%;
+      margin: 0px;
+      /*padding-top: 40px;*/
+    }
+
+    #sidebar {
+      height: 100%;
+      width: 400px;
+      padding: 5px;
+      background-color: #FFFFFF;
+      position: absolute;
+      right: 0%;
+      margin-left: 0px;
+      z-index: 1;
+    }
+  </style>
+</head>
+<body>
+  <div id="sidebar">
+    <button id="layer1">Layer1</button>
+    <button id="layer2">Layer2</button>
+  </div>
+  <div id="map"></div>
+</body>
+</html>
