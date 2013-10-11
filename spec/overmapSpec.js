@@ -103,6 +103,17 @@ describe("Overmap", function() {
       expect(otherListener).toHaveBeenCalled();
     });
 
+    it("should handle drawing aborted", function(){
+      layer.addListener(Overmap.Layer.Events.DRAWING_ABORTED, layerListener, this);
+      layer.addListener(Overmap.Layer.Events.DRAWING_FINISHED, otherListener, this);
+      drawingManager.startDrawOnLayer(layer);
+
+      expect(layer.isSomeoneDrawingOn()).toBeTruthy();
+      drawingManager.stopDraw();
+      expect(layerListener).toHaveBeenCalled();
+
+    });
+
     it("should export shape in wkt format", function(){
       layer.addListener(Overmap.Layer.Events.DRAWING_COMPLETED, layerListener, this);
       layer.addListener(Overmap.Layer.Events.DRAWING_FINISHED, otherListener, this);
