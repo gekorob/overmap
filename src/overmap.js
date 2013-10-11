@@ -134,6 +134,7 @@
     this.clearLayer = function () {
       if (feature && !this.isSomeoneDrawingOn()) {
         feature.setEditable(false);
+        google.maps.event.clearInstanceListeners(feature.getPath());
         feature.setMap(null);
         feature = null;
       }
@@ -166,18 +167,32 @@
           break;
 
         case DrawingManager.Events.SHAPE_DRAWING_COMPLETED:
+          var that = this;
+          var shapePath = arg.getPath();
+
+          google.maps.event.addListener(shapePath, 'set_at', function(){
+            that.trigger(Layer.Events.DRAWING_COMPLETED);
+          });
+          google.maps.event.addListener(shapePath, 'insert_at', function(){
+            that.trigger(Layer.Events.DRAWING_COMPLETED);
+          });
+
           setFeature(arg);
           setDrawingOn(false);
           this.trigger(Layer.Events.DRAWING_COMPLETED);
           break;
 
-        case DrawingManager.Events.SHAPE_DRAWING_FINISHED:
-          if (this.isSomeoneDrawingOn()) {
-            this.trigger(Layer.Events.DRAWING_ABORTED);
-          }
+        case DrawingManager.Events.SHAPE_DRAWING_ABORTED:
           setDrawingOn(false);
-          this.trigger(Layer.Events.DRAWING_FINISHED);
+          this.clearLayer();
+          this.trigger(Layer.Events.DRAWING_ABORTED);
           break;
+//        case DrawingManager.Events.SHAPE_DRAWING_FINISHED:
+//          setDrawingOn(false);
+//          if (this.isSomeoneDrawingOn()) {
+//            this.trigger(Layer.Events.DRAWING_ABORTED);
+//          }
+//          break;
 
         default:
           console.log('update notification not managed');
@@ -262,6 +277,7 @@
     DrawingManager.Events = {
       SHAPE_DRAWING_STARTED: 'shape:drawing:started',
       SHAPE_DRAWING_FINISHED: 'shape:drawing:finished',
+      SHAPE_DRAWING_ABORTED: 'shape:drawing:aborted',
       SHAPE_DRAWING_COMPLETED: 'shape:drawing:completed'
     };
 
@@ -310,15 +326,15 @@
         var newShape = e.overlay;
         newShape.type = e.type;
         that.currentLayer.update(DrawingManager.Events.SHAPE_DRAWING_COMPLETED, newShape);
-        that.stopDraw();
+        that.drawingManager.setDrawingMode(null);
       });
     }
   };
 
   DrawingManager.prototype.stopDraw = function () {
     if (this.currentLayer) {
-      this.currentLayer.update(DrawingManager.Events.SHAPE_DRAWING_FINISHED);
       this.drawingManager.setDrawingMode(null);
+      this.currentLayer.update(DrawingManager.Events.SHAPE_DRAWING_ABORTED);
       google.maps.event.removeListener(this.overlayCompleteListenerOnce);
     }
   };

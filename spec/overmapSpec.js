@@ -1,40 +1,39 @@
 
-var fake = {
-  polygon: (function(){
-    var points = [
-      new google.maps.LatLng(0.0, 0.0),
-      new google.maps.LatLng(1.0, 0.0),
-      new google.maps.LatLng(1.0, 1.0),
-      new google.maps.LatLng(0.0, 1.0),
-      new google.maps.LatLng(0.0, 0.0)
-    ];
-
-    return new google.maps.Polygon({
-      paths: points,
-      strokeColor: '#000',
-      strokeOpacity: 1,
-      strokeWeight: 2,
-      fillColor:  '#000',
-      fillOpacity: 0.8
-    });
-  }()),
-
-  triggerOverlayCompleted: function(drawingManager){
-    google.maps.event.trigger(drawingManager, "overlaycomplete",
-      {
-        overlay: this.polygon,
-        type:google.maps.drawing.OverlayType.POLYGON
-      }
-    );
-  }
-
-};
-
-
 describe("Overmap", function() {
-  var map, drawingManager;
+  var map, drawingManager, fake;
 
   beforeEach(function() {
+
+    fake = {
+      polygon: (function(){
+        var points = [
+          new google.maps.LatLng(0.0, 0.0),
+          new google.maps.LatLng(1.0, 0.0),
+          new google.maps.LatLng(1.0, 1.0),
+          new google.maps.LatLng(0.0, 1.0),
+          new google.maps.LatLng(0.0, 0.0)
+        ];
+
+        return new google.maps.Polygon({
+          paths: points,
+          strokeColor: '#000',
+          strokeOpacity: 1,
+          strokeWeight: 2,
+          fillColor:  '#000',
+          fillOpacity: 0.8
+        });
+      }()),
+
+      triggerOverlayCompleted: function(drawingManager){
+        google.maps.event.trigger(drawingManager, "overlaycomplete",
+          {
+            overlay: this.polygon,
+            type:google.maps.drawing.OverlayType.POLYGON
+          }
+        );
+      }
+
+    };
 
     var mapOptions = {
       zoom:6,
@@ -90,7 +89,6 @@ describe("Overmap", function() {
 
     it("should handle drawing complete", function(){
       layer.addListener(Overmap.Layer.Events.DRAWING_COMPLETED, layerListener, this);
-      layer.addListener(Overmap.Layer.Events.DRAWING_FINISHED, otherListener, this);
       drawingManager.startDrawOnLayer(layer);
 
       expect(layer.isSomeoneDrawingOn()).toBeTruthy();
@@ -98,14 +96,35 @@ describe("Overmap", function() {
 
       expect(layerListener).toHaveBeenCalled();
       expect(layer.getFeature()).toEqual(fake.polygon);
+    });
 
+    it("should handle drawing aborted", function(){
+      layer.addListener(Overmap.Layer.Events.DRAWING_ABORTED, layerListener, this);
+      drawingManager.startDrawOnLayer(layer);
 
-      expect(otherListener).toHaveBeenCalled();
+      expect(layer.isSomeoneDrawingOn()).toBeTruthy();
+
+      drawingManager.stopDraw();
+      expect(layerListener).toHaveBeenCalled();
+      expect(layer.getFeature()).toEqual(null);
+    });
+
+    it("should handle feature editing after complete", function(){
+      layer.addListener(Overmap.Layer.Events.DRAWING_COMPLETED, layerListener, this);
+      drawingManager.startDrawOnLayer(layer);
+
+      expect(layer.isSomeoneDrawingOn()).toBeTruthy();
+      fake.triggerOverlayCompleted(drawingManager.getDrawingManager());
+
+      expect(layerListener).toHaveBeenCalled();
+      fake.polygon.getPath().setAt(1,new google.maps.LatLng(2.0, 2.0));
+      expect(layerListener).toHaveBeenCalled();
+
+      expect(layer.getFeatureAsWKT()).toEqual('POLYGON((0 0,2 2,1 1,1 0,0 0))');
     });
 
     it("should export shape in wkt format", function(){
       layer.addListener(Overmap.Layer.Events.DRAWING_COMPLETED, layerListener, this);
-      layer.addListener(Overmap.Layer.Events.DRAWING_FINISHED, otherListener, this);
       drawingManager.startDrawOnLayer(layer);
 
       expect(layer.isSomeoneDrawingOn()).toBeTruthy();
