@@ -42,6 +42,10 @@
       $('#layer2').click(function(){
         dm.startDrawOnLayer(layer2);
       });
+
+      layer1.addListener(Overmap.Layer.Events.DRAWING_COMPLETED, function(){
+        console.log('COMPLETED');
+      }, this);
     });
   </script>
 
